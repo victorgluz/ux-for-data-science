@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Seleção de Fornecedor — Previsão de Demanda</title>
+  <style>
+    :root {
+      --blue:   #2196F3;
+      --orange: #FF9800;
+      --green:  #4CAF50;
+      --dark:   #1a1a2e;
+      --card:   #ffffff;
+      --bg:     #f4f6fb;
+      --text:   #2c2c3e;
+      --muted:  #6b7280;
+      --border: #e5e7eb;
+      --radius: 16px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 60%, #0f3460 100%);
+      color: #fff;
+      padding: 72px 24px 56px;
+      text-align: center;
+    }
+    .hero .tag {
+      display: inline-block;
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 100px;
+      padding: 4px 16px;
+      font-size: 12px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+    .hero h1 {
+      font-size: clamp(26px, 5vw, 44px);
+      font-weight: 800;
+      margin-bottom: 12px;
+      line-height: 1.2;
+    }
+    .hero p {
+      font-size: 16px;
+      color: rgba(255,255,255,0.7);
+      max-width: 680px;
+      margin: 0 auto 32px;
+    }
+    .hero .verdict-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: #4CAF50;
+      border-radius: 100px;
+      padding: 10px 28px;
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: .01em;
+    }
+
+    /* ── LAYOUT ── */
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+
+    section { padding: 64px 0 48px; }
+    section:nth-child(even) { background: #fff; }
+
+    .section-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--blue);
+      margin-bottom: 8px;
+    }
+    h2 {
+      font-size: clamp(20px, 3vw, 28px);
+      font-weight: 800;
+      color: var(--dark);
+      margin-bottom: 12px;
+    }
+    .lead {
+      font-size: 16px;
+      color: var(--muted);
+      max-width: 720px;
+      margin-bottom: 36px;
+    }
+
+    /* ── CARDS ── */
+    .cards { display: grid; gap: 20px; }
+    .cards-3 { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+    .cards-2 { grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px;
+      position: relative;
+      overflow: hidden;
+    }
+    .card.highlight { border-color: #4CAF50; box-shadow: 0 0 0 3px rgba(76,175,80,0.15); }
+    .card.warn      { border-color: #FF9800; box-shadow: 0 0 0 3px rgba(255,152,0,0.12); }
+    .card.danger    { border-color: #ef5350; box-shadow: 0 0 0 3px rgba(239,83,80,0.12); }
+
+    .card-badge {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: 100px;
+    }
+    .badge-green  { background: #e8f5e9; color: #2e7d32; }
+    .badge-orange { background: #fff3e0; color: #e65100; }
+    .badge-red    { background: #ffebee; color: #b71c1c; }
+
+    .card h3 {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .dot {
+      width: 12px; height: 12px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    /* ── METRIC ROW ── */
+    .metric-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 14px;
+    }
+    .metric-row:last-child { border-bottom: none; }
+    .metric-label { color: var(--muted); }
+    .metric-value { font-weight: 700; font-size: 15px; }
+    .metric-value.good { color: #2e7d32; }
+    .metric-value.mid  { color: #e65100; }
+    .metric-value.bad  { color: #b71c1c; }
+
+    /* ── FIGURE ── */
+    .fig-wrap {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin-top: 28px;
+    }
+    .fig-wrap img {
+      width: 100%;
+      display: block;
+    }
+    .fig-caption {
+      padding: 14px 20px;
+      font-size: 13px;
+      color: var(--muted);
+      border-top: 1px solid var(--border);
+      background: #fafafa;
+    }
+    .fig-caption strong { color: var(--text); }
+
+    /* ── SCOREBOARD ── */
+    .scoreboard {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 36px;
+    }
+    .score-item {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+    }
+    .score-item .score-num {
+      font-size: 36px;
+      font-weight: 800;
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+    .score-item .score-label { font-size: 12px; color: var(--muted); }
+
+    /* ── INSIGHT BOX ── */
+    .insight {
+      background: #e8f0fe;
+      border-left: 4px solid var(--blue);
+      border-radius: 0 12px 12px 0;
+      padding: 16px 20px;
+      margin: 20px 0;
+      font-size: 14px;
+      color: #1a237e;
+    }
+    .insight.green { background: #e8f5e9; border-color: #4CAF50; color: #1b5e20; }
+    .insight.orange { background: #fff3e0; border-color: #FF9800; color: #bf360c; }
+    .insight.red { background: #ffebee; border-color: #ef5350; color: #b71c1c; }
+
+    /* ── PROS / CONS ── */
+    .pros-cons { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+    @media (max-width: 500px) { .pros-cons { grid-template-columns: 1fr; } }
+    .pro-item, .con-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      font-size: 13.5px;
+      padding: 8px 0;
+    }
+    .pro-item::before { content: '✓'; color: #4CAF50; font-weight: 700; flex-shrink: 0; margin-top: 2px; }
+    .con-item::before { content: '✗'; color: #ef5350; font-weight: 700; flex-shrink: 0; margin-top: 2px; }
+
+    /* ── VERDICT ── */
+    .verdict-section {
+      background: linear-gradient(135deg, #1b5e20, #2e7d32);
+      color: #fff;
+      border-radius: var(--radius);
+      padding: 40px;
+      margin-top: 40px;
+      text-align: center;
+    }
+    .verdict-section h2 { color: #fff; font-size: 28px; margin-bottom: 8px; }
+    .verdict-section p { color: rgba(255,255,255,0.85); max-width: 640px; margin: 0 auto 24px; }
+    .verdict-section .big-num {
+      font-size: 56px;
+      font-weight: 900;
+      color: #a5d6a7;
+      display: block;
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+
+    /* ── PESO TABLE ── */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+      margin-top: 20px;
+    }
+    th {
+      background: #f0f4ff;
+      text-align: left;
+      padding: 10px 14px;
+      font-weight: 600;
+      color: var(--dark);
+      border-bottom: 2px solid var(--border);
+    }
+    td { padding: 10px 14px; border-bottom: 1px solid var(--border); }
+    tr:last-child td { border-bottom: none; }
+    .peso { font-weight: 700; color: var(--blue); }
+
+    /* ── BAR VISUAL ── */
+    .bar-wrap { display: flex; align-items: center; gap: 10px; }
+    .bar-track { flex: 1; height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }
+    .bar-fill { height: 100%; border-radius: 4px; }
+
+    /* ── FOOTER ── */
+    footer {
+      text-align: center;
+      padding: 32px 24px;
+      color: var(--muted);
+      font-size: 13px;
+      border-top: 1px solid var(--border);
+      background: #fff;
+    }
+
+    @media (max-width: 640px) {
+      .cards-3, .cards-2 { grid-template-columns: 1fr; }
+      .pros-cons { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════
+     HERO
+════════════════════════════════════════════════ -->
+<div class="hero">
+  <div class="tag">Análise de Dados · Demand Planning</div>
+  <h1>Qual fornecedor de previsão<br>de demanda escolher?</h1>
+  <p>
+    Três fornecedores competiram para prever 17 semanas de vendas reais
+    em 94 lojas e 197 produtos. Analisamos quem errou menos — e por quê.
+    <br><span style="font-size:13px;color:rgba(255,255,255,0.55)">Análise com remoção de outliers por IQR/SKU — 139.730 registros válidos avaliados.</span>
+  </p>
+  <div class="verdict-pill">
+    🏆 &nbsp; Recomendação: <strong>Fornecedor 01</strong>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     O QUE ESTAMOS RESOLVENDO
+════════════════════════════════════════════════ -->
+<section>
+  <div class="container">
+    <div class="section-label">Contexto</div>
+    <h2>O desafio em poucas palavras</h2>
+    <p class="lead">
+      A área de planejamento de demanda precisava escolher um novo sistema de previsão.
+      Em vez de confiar só no discurso de cada fornecedor, a empresa deu dados reais para cada um
+      e mediu quem chegou mais perto da realidade.
+    </p>
+
+    <div class="cards cards-3">
+      <div class="card">
+        <h3>📦 O que foi previsto</h3>
+        <p style="font-size:14px;color:var(--muted)">
+          Cada fornecedor recebeu <strong>3 anos de histórico</strong> de vendas e precisou prever
+          <strong>17 semanas</strong> futuras — semana a semana, por loja e produto.
+        </p>
+      </div>
+      <div class="card">
+        <h3>🏪 Escala do teste</h3>
+        <div class="metric-row"><span class="metric-label">Lojas avaliadas</span><span class="metric-value">94</span></div>
+        <div class="metric-row"><span class="metric-label">Produtos (SKUs)</span><span class="metric-value">197</span></div>
+        <div class="metric-row"><span class="metric-label">Semanas previstas</span><span class="metric-value">17</span></div>
+        <div class="metric-row"><span class="metric-label">Registros analisados</span><span class="metric-value">~147 mil</span></div>
+      </div>
+      <div class="card">
+        <h3>📏 Como medimos o erro</h3>
+        <p style="font-size:14px;color:var(--muted)">
+          A principal métrica é a <strong>Acurácia de Previsão (FA)</strong> — quanto mais perto de 100%, melhor.
+          Também medimos o <strong>Viés (Bias)</strong>: o fornecedor tende a prever demais ou de menos?
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     RESULTADO GERAL
+════════════════════════════════════════════════ -->
+<section>
+  <div class="container">
+    <div class="section-label">Métricas Globais</div>
+    <h2>O resultado geral: quem acertou mais?</h2>
+    <p class="lead">
+      Olhando todos os produtos, lojas e semanas ao mesmo tempo, a diferença entre os fornecedores é enorme.
+    </p>
+
+    <div class="insight green">
+      <strong>Como ler a Acurácia de Previsão (FA):</strong> imagine que a demanda real foi 100 unidades.
+      Se o fornecedor previu 100, a acurácia é 100%. Se previu 50 ou 150, a acurácia cai proporcionalmente.
+    </div>
+
+    <div class="cards cards-3" style="margin-top:24px">
+      <div class="card highlight">
+        <div class="card-badge badge-green">1º Lugar</div>
+        <h3><span class="dot" style="background:#2196F3"></span>Fornecedor 01</h3>
+        <div class="metric-row">
+          <span class="metric-label">Acurácia (FA)</span>
+          <span class="metric-value good">49,2%</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Erro Médio (WAPE)</span>
+          <span class="metric-value good">50,8%</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Viés (Bias)</span>
+          <span class="metric-value good">+10,1%</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">MAE</span>
+          <span class="metric-value">31,5 unid.</span>
+        </div>
+        <p style="font-size:12px;color:#2e7d32;margin-top:14px;font-weight:600">
+          ✓ Melhor em todos os critérios avaliados
+        </p>
+      </div>
+
+      <div class="card warn">
+        <div class="card-badge badge-orange">2º Lugar</div>
+        <h3><span class="dot" style="background:#FF9800"></span>Fornecedor 02</h3>
+        <div class="metric-row">
+          <span class="metric-label">Acurácia (FA)</span>
+          <span class="metric-value mid">30,6%</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Erro Médio (WAPE)</span>
+          <span class="metric-value mid">69,4%</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Viés (Bias)</span>
+          <span class="metric-value mid">+7,6%</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">MAE</span>
+          <span class="metric-value">43,0 unid.</span>
+        </div>
+        <p style="font-size:12px;color:#e65100;margin-top:14px;font-weight:600">
+          ⚠ Funcional, mas com acurácia insuficiente
+        </p>
+      </div>
+
+      <div class="card danger">
+        <div class="card-badge badge-red">3º Lugar</div>
+        <h3><span class="dot" style="background:#4CAF50"></span>Fornecedor 03</h3>
+        <div class="metric-row">
+          <span class="metric-label">Acurácia (FA)</span>
+          <span class="metric-value bad">26,9%</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Erro Médio (WAPE)</span>
+          <span class="metric-value bad">73,1%</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Viés (Bias)</span>
+          <span class="metric-value bad">+47,7%</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">MAE</span>
+          <span class="metric-value">45,3 unid.</span>
+        </div>
+        <p style="font-size:12px;color:#b71c1c;margin-top:14px;font-weight:600">
+          ✗ Bias severo — previsões infladas sistematicamente
+        </p>
+      </div>
+    </div>
+
+    <div class="insight" style="margin-bottom:28px">
+      <strong>Nota metodológica — Remoção de Outliers:</strong> Antes de calcular qualquer métrica,
+      foram removidos registros com volumes anormais usando o método IQR por SKU
+      (fator 1,5x em semanas normais e 2,5x em semanas de campanha, para preservar picos legítimos).
+      Foram eliminados <strong>7.983 registros (5,4%)</strong> do total, resultando em
+      <strong>139.730 registros válidos</strong>. O Fornecedor 03 tinha previsões de até <strong>220.307 unidades</strong>
+      para produtos que vendem, em média, dezenas por semana — esses valores foram tratados antes da análise.
+    </div>
+
+    <div class="fig-wrap">
+      <img src="fig_00_outliers_diagnostico.png" alt="Diagnóstico de outliers: antes e depois" />
+      <div class="fig-caption">
+        <strong>Figura 0:</strong> Distribuição do VOLUME_REAL antes e depois da remoção de outliers (IQR por SKU).
+        O boxplot à esquerda mostra a cauda extremamente longa dos dados brutos; à direita, os dados limpos usados na análise.
+      </div>
+    </div>
+
+    <div class="fig-wrap" style="margin-top:24px">
+      <img src="fig_01_metricas_globais.png" alt="Gráfico de métricas globais por fornecedor" />
+      <div class="fig-caption">
+        <strong>Figura 1:</strong> Acurácia (FA), WAPE e Viés (Bias) por fornecedor — dados após remoção de outliers.
+        Barras verdes indicam o melhor resultado em cada métrica.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     PRODUTOS MAIS IMPORTANTES (CLASSE A)
+════════════════════════════════════════════════ -->
+<section>
+  <div class="container">
+    <div class="section-label">Análise por Criticidade</div>
+    <h2>E nos produtos mais importantes?</h2>
+    <p class="lead">
+      Na classificação ABC, os produtos <strong>Classe A</strong> são os de maior valor e volume.
+      Errar a previsão nesses itens custa muito mais — tanto em excesso de estoque quanto em ruptura (falta nas prateleiras).
+    </p>
+
+    <div class="insight">
+      <strong>Por que classe A importa mais?</strong> Um erro de 20% num produto que vende 10.000 unidades/semana
+      representa 2.000 unidades fora do planejado. O mesmo erro num produto que vende 10 unidades é irrelevante.
+    </div>
+
+    <div class="cards cards-3" style="margin-top:24px">
+      <div class="card highlight">
+        <h3><span class="dot" style="background:#2196F3"></span>Fornecedor 01</h3>
+        <div class="metric-row">
+          <span class="metric-label">FA — Classe A</span>
+          <span class="metric-value good">48,4%</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">FA — Classe B</span>
+          <span class="metric-value good">51,3%</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">FA — Classe C</span>
+          <span class="metric-value good">48,1%</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">FA — Classe D</span>
+          <span class="metric-value good">37,9%</span>
+        </div>
+      </div>
+      <div class="card warn">
+        <h3><span class="dot" style="background:#FF9800"></span>Fornecedor 02</h3>
+        <div class="metric-row">
+          <span class="metric-label">FA — Classe A</span>
+          <span class="metric-value mid">28,0%</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">FA — Classe B</span>
+          <span class="metric-value mid">31,2%</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">FA — Classe C</span>
+          <span class="metric-value mid">31,4%</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">FA — Classe D</span>
+          <span class="metric-value mid">21,5%</span>
+        </div>
+      </div>
+      <div class="card danger">
+        <h3><span class="dot" style="background:#4CAF50"></span>Fornecedor 03</h3>
+        <div class="metric-row">
+          <span class="metric-label">FA — Classe A</span>
+          <span class="metric-value bad">23,7%</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">FA — Classe B</span>
+          <span class="metric-value bad">27,9%</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">FA — Classe C</span>
+          <span class="metric-value bad">29,5%</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">FA — Classe D</span>
+          <span class="metric-value bad">22,1%</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="fig-wrap">
+      <img src="fig_02_abc.png" alt="FA e Bias por Classe ABC" />
+      <div class="fig-caption">
+        <strong>Figura 2:</strong> Acurácia e Viés segmentados por Classe ABC.
+        O Fornecedor 01 lidera em todas as classes. O Fornecedor 03 apresenta acurácia nula nos itens mais críticos.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     CAMPANHAS PROMOCIONAIS
+════════════════════════════════════════════════ -->
+<section>
+  <div class="container">
+    <div class="section-label">Picos de Demanda</div>
+    <h2>Quem sabe prever uma promoção?</h2>
+    <p class="lead">
+      Semanas com campanha são as mais difíceis de prever — a demanda sobe de forma abrupta.
+      Saber antecipar esses picos é essencial para não faltar produto e não perder vendas.
+    </p>
+
+    <div class="cards cards-2" style="margin-top:8px">
+      <div class="card">
+        <h3>📊 FA com Campanha</h3>
+        <div class="metric-row">
+          <span class="metric-label">Fornecedor 01</span>
+          <div class="bar-wrap" style="flex:1;margin-left:12px">
+            <div class="bar-track"><div class="bar-fill" style="width:57.9%;background:#2196F3"></div></div>
+            <span class="metric-value good" style="min-width:48px;text-align:right">57,9%</span>
+          </div>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Fornecedor 02</span>
+          <div class="bar-wrap" style="flex:1;margin-left:12px">
+            <div class="bar-track"><div class="bar-fill" style="width:45.0%;background:#FF9800"></div></div>
+            <span class="metric-value mid" style="min-width:48px;text-align:right">45,0%</span>
+          </div>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Fornecedor 03</span>
+          <div class="bar-wrap" style="flex:1;margin-left:12px">
+            <div class="bar-track"><div class="bar-fill" style="width:25.6%;background:#ef5350"></div></div>
+            <span class="metric-value bad" style="min-width:48px;text-align:right">25,6%</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>📊 FA sem Campanha</h3>
+        <div class="metric-row">
+          <span class="metric-label">Fornecedor 01</span>
+          <div class="bar-wrap" style="flex:1;margin-left:12px">
+            <div class="bar-track"><div class="bar-fill" style="width:41.5%;background:#2196F3"></div></div>
+            <span class="metric-value good" style="min-width:48px;text-align:right">41,5%</span>
+          </div>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Fornecedor 02</span>
+          <div class="bar-wrap" style="flex:1;margin-left:12px">
+            <div class="bar-track"><div class="bar-fill" style="width:17.8%;background:#FF9800"></div></div>
+            <span class="metric-value mid" style="min-width:48px;text-align:right">17,8%</span>
+          </div>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Fornecedor 03</span>
+          <div class="bar-wrap" style="flex:1;margin-left:12px">
+            <div class="bar-track"><div class="bar-fill" style="width:28.1%;background:#ef5350"></div></div>
+            <span class="metric-value bad" style="min-width:48px;text-align:right">28,1%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="insight green" style="margin-top:24px">
+      <strong>Destaque do Fornecedor 01:</strong> é o único que melhora significativamente a acurácia nas semanas de campanha
+      (+16,4 pontos percentuais vs. semanas normais), além de ter viés praticamente neutro (-0,06%) nesses períodos.
+      Isso indica que o modelo aprendeu a identificar o padrão promocional.
+    </div>
+
+    <div class="insight red">
+      <strong>Falha do Fornecedor 03 em campanhas:</strong> o viés chega a +57,9% nas semanas com campanha —
+      prevê quase 60% a mais do que o real. Isso geraria excesso de estoque e capital parado.
+      O Fornecedor 02 também piora fora das campanhas (FA cai para apenas 17,8%).
+    </div>
+
+    <div class="fig-wrap">
+      <img src="fig_07_campanha_volume.png" alt="FA: Campanha vs Sem Campanha e por Faixa de Volume" />
+      <div class="fig-caption">
+        <strong>Figura 7:</strong> Acurácia em semanas com e sem campanha (esquerda)
+        e por faixa de volume do produto (direita). O Fornecedor 01 domina em todos os cenários.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     VIÉS (DIREÇÃO DO ERRO)
+════════════════════════════════════════════════ -->
+<section>
+  <div class="container">
+    <div class="section-label">Análise de Viés</div>
+    <h2>O erro vai para qual lado?</h2>
+    <p class="lead">
+      Saber se o fornecedor tende a prever <em>demais</em> ou <em>de menos</em> é tão importante quanto saber
+      a magnitude do erro. Cada direção tem um custo diferente para a empresa.
+    </p>
+
+    <div class="cards cards-2">
+      <div class="card">
+        <h3>📈 Over-forecast (previu demais)</h3>
+        <p style="font-size:14px;color:var(--muted);margin-bottom:12px">
+          O fornecedor previu mais do que o mercado comprou. Consequência: <strong>excesso de estoque</strong>,
+          capital parado, risco de vencimento/perda.
+        </p>
+        <div class="metric-row">
+          <span class="metric-label">Fornecedor 01</span>
+          <span class="metric-value">56,9% dos registros</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Fornecedor 02</span>
+          <span class="metric-value">46,6% dos registros</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Fornecedor 03</span>
+          <span class="metric-value bad">70,1% dos registros</span>
+        </div>
+      </div>
+      <div class="card">
+        <h3>📉 Under-forecast (previu de menos)</h3>
+        <p style="font-size:14px;color:var(--muted);margin-bottom:12px">
+          O fornecedor previu menos do que o mercado comprou. Consequência: <strong>ruptura de estoque</strong>,
+          perda de vendas e clientes insatisfeitos.
+        </p>
+        <div class="metric-row">
+          <span class="metric-label">Fornecedor 01</span>
+          <span class="metric-value">43,1% dos registros</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Fornecedor 02</span>
+          <span class="metric-value good">53,4% dos registros</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Fornecedor 03</span>
+          <span class="metric-value">29,9% dos registros</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="fig-wrap">
+      <img src="fig_03_dist_erros.png" alt="Distribuição dos erros por fornecedor" />
+      <div class="fig-caption">
+        <strong>Figura 3:</strong> Histograma dos erros percentuais de cada fornecedor.
+        Uma distribuição centrada no zero (linha tracejada) indica previsão sem viés sistemático.
+        Observe como o Fornecedor 03 tem erros extremamente deslocados para a direita (over-forecast severo).
+      </div>
+    </div>
+
+    <div class="fig-wrap">
+      <img src="fig_04_scatter.png" alt="Real vs Previsto por fornecedor" />
+      <div class="fig-caption">
+        <strong>Figura 4:</strong> Cada ponto representa uma previsão. A linha tracejada é a previsão perfeita (previsto = real).
+        Pontos acima da linha = over-forecast; abaixo = under-forecast.
+        O Fornecedor 01 tem pontos mais concentrados ao redor da linha ideal.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     CONSISTÊNCIA TEMPORAL
+════════════════════════════════════════════════ -->
+<section>
+  <div class="container">
+    <div class="section-label">Análise Temporal</div>
+    <h2>O modelo é estável ao longo do tempo?</h2>
+    <p class="lead">
+      Um bom sistema de previsão precisa ser consistente — não pode ser excelente uma semana e péssimo na outra.
+      Instabilidade gera imprevisibilidade operacional.
+    </p>
+
+    <div class="insight orange">
+      <strong>Desvio-padrão da acurácia semanal:</strong> quanto menor, mais estável é o fornecedor.
+      Um fornecedor com FA média de 40% mas desvio de 20% é mais arriscado do que outro com FA de 38% e desvio de 5%.
+    </div>
+
+    <div class="cards cards-3">
+      <div class="card highlight">
+        <h3><span class="dot" style="background:#2196F3"></span>Fornecedor 01</h3>
+        <div class="metric-row">
+          <span class="metric-label">FA Média Semanal</span>
+          <span class="metric-value good">49,3%</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Desvio-Padrão FA</span>
+          <span class="metric-value good">Menor entre os três</span>
+        </div>
+        <p style="font-size:13px;color:#2e7d32;margin-top:12px">✓ Previsões mais consistentes semana a semana</p>
+      </div>
+      <div class="card warn">
+        <h3><span class="dot" style="background:#FF9800"></span>Fornecedor 02</h3>
+        <div class="metric-row">
+          <span class="metric-label">FA Média Semanal</span>
+          <span class="metric-value mid">30,7%</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Desvio-Padrão FA</span>
+          <span class="metric-value mid">Intermediário</span>
+        </div>
+        <p style="font-size:13px;color:#e65100;margin-top:12px">⚠ Variações moderadas ao longo do período</p>
+      </div>
+      <div class="card danger">
+        <h3><span class="dot" style="background:#4CAF50"></span>Fornecedor 03</h3>
+        <div class="metric-row">
+          <span class="metric-label">FA Média Semanal</span>
+          <span class="metric-value bad">27,0%</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Desvio-Padrão FA</span>
+          <span class="metric-value bad">Maior entre os três</span>
+        </div>
+        <p style="font-size:13px;color:#b71c1c;margin-top:12px">✗ Alta instabilidade e bias sistemático elevado</p>
+      </div>
+    </div>
+
+    <div class="fig-wrap">
+      <img src="fig_05_temporal.png" alt="Evolução temporal da acurácia e bias por semana" />
+      <div class="fig-caption">
+        <strong>Figura 5:</strong> Acurácia (FA) e Viés (Bias) de cada fornecedor ao longo das 17 semanas avaliadas.
+        O Fornecedor 01 mantém uma linha estável e superior. O Fornecedor 03 oscila próximo de zero durante todo o período.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     CATEGORIAS E ESTADOS
+════════════════════════════════════════════════ -->
+<section>
+  <div class="container">
+    <div class="section-label">Cobertura Geográfica e por Categoria</div>
+    <h2>E por categoria de produto e estado?</h2>
+    <p class="lead">
+      Um bom sistema precisa funcionar bem em todo o portfólio e em todas as regiões —
+      não apenas em alguns produtos ou estados privilegiados.
+    </p>
+
+    <div class="fig-wrap">
+      <img src="fig_06_heatmap_cat.png" alt="Acurácia por Categoria e Fornecedor" />
+      <div class="fig-caption">
+        <strong>Figura 6:</strong> Acurácia por categoria de produto. Verde = boa acurácia, Vermelho = acurácia ruim.
+        O Fornecedor 01 apresenta os maiores valores (mais verde) de forma consistente em todas as categorias.
+      </div>
+    </div>
+
+    <div class="fig-wrap" style="margin-top:24px">
+      <img src="fig_08_heatmap_estado.png" alt="Acurácia por Estado e Fornecedor" />
+      <div class="fig-caption">
+        <strong>Figura 8:</strong> Acurácia por estado brasileiro. O Fornecedor 01 lidera em praticamente todos os estados,
+        demonstrando robustez geográfica. O Fornecedor 03 apresenta células vermelhas (próximas a zero) em todo o mapa.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     RANKING FINAL
+════════════════════════════════════════════════ -->
+<section>
+  <div class="container">
+    <div class="section-label">Decisão Final</div>
+    <h2>Como chegamos ao ranking?</h2>
+    <p class="lead">
+      Combinamos todas as métricas com pesos que refletem o impacto real no negócio.
+      Itens de maior valor e semanas de campanha receberam peso maior.
+    </p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Critério de Avaliação</th>
+          <th>Peso</th>
+          <th>Justificativa</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Acurácia Global (FA)</td>
+          <td class="peso">30%</td>
+          <td>Base do desempenho geral do portfólio</td>
+        </tr>
+        <tr>
+          <td>Acurácia nos Itens Classe A</td>
+          <td class="peso">25%</td>
+          <td>Maior impacto financeiro por unidade errada</td>
+        </tr>
+        <tr>
+          <td>Acurácia em Semanas de Campanha</td>
+          <td class="peso">20%</td>
+          <td>Capacidade de capturar picos de demanda</td>
+        </tr>
+        <tr>
+          <td>Acurácia nos Top-20 SKUs</td>
+          <td class="peso">15%</td>
+          <td>SKUs de maior volume e criticidade operacional</td>
+        </tr>
+        <tr>
+          <td>Consistência Semanal</td>
+          <td class="peso">10%</td>
+          <td>Estabilidade e previsibilidade do modelo</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="fig-wrap" style="margin-top:28px">
+      <img src="fig_09_ranking_final.png" alt="Ranking final ponderado dos fornecedores" />
+      <div class="fig-caption">
+        <strong>Figura 9:</strong> Score ponderado final de cada fornecedor (escala 0 a 1).
+        O Fornecedor 01 vence com folga expressiva em todos os critérios.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     PONTOS FORTES E FRACOS
+════════════════════════════════════════════════ -->
+<section>
+  <div class="container">
+    <div class="section-label">Análise Qualitativa</div>
+    <h2>Pontos fortes e fracos de cada um</h2>
+
+    <div class="cards cards-3">
+      <div class="card highlight">
+        <div class="card-badge badge-green">Recomendado</div>
+        <h3><span class="dot" style="background:#2196F3"></span>Fornecedor 01</h3>
+        <div style="margin-top:12px;font-size:13px;font-weight:600;color:#2e7d32">PONTOS FORTES</div>
+        <div class="pros-cons" style="grid-template-columns:1fr">
+          <div class="pro-item">Melhor FA global (45,4%)</div>
+          <div class="pro-item">Acurácia superior nos itens Classe A</div>
+          <div class="pro-item">Consegue prever picos de campanha (+12,9 pp)</div>
+          <div class="pro-item">Viés baixo e balanceado (+6,2%)</div>
+          <div class="pro-item">Mais consistente semana a semana</div>
+          <div class="pro-item">Melhor cobertura geográfica e por categoria</div>
+        </div>
+        <div style="margin-top:16px;font-size:13px;font-weight:600;color:#c62828">RESSALVAS</div>
+        <div class="pros-cons" style="grid-template-columns:1fr">
+          <div class="con-item">FA global de 45% ainda é abaixo do ideal de mercado (70–80%)</div>
+          <div class="con-item">Itens de baixo volume (Classe D) apresentam menor acurácia</div>
+        </div>
+      </div>
+
+      <div class="card warn">
+        <div class="card-badge badge-orange">2º Lugar</div>
+        <h3><span class="dot" style="background:#FF9800"></span>Fornecedor 02</h3>
+        <div style="margin-top:12px;font-size:13px;font-weight:600;color:#2e7d32">PONTOS FORTES</div>
+        <div class="pros-cons" style="grid-template-columns:1fr">
+          <div class="pro-item">Viés próximo de zero na maioria dos segmentos</div>
+          <div class="pro-item">Distribuição de erros razoavelmente simétrica</div>
+        </div>
+        <div style="margin-top:16px;font-size:13px;font-weight:600;color:#c62828">PONTOS FRACOS</div>
+        <div class="pros-cons" style="grid-template-columns:1fr">
+          <div class="con-item">FA de apenas 28% — muito abaixo do necessário</div>
+          <div class="con-item">Não capta bem os picos de campanha</div>
+          <div class="con-item">Desempenho fraco nos itens Classe A</div>
+          <div class="con-item">Não seria viável para uso em produção sem melhorias</div>
+        </div>
+      </div>
+
+      <div class="card danger">
+        <div class="card-badge badge-red">3º Lugar</div>
+        <h3><span class="dot" style="background:#4CAF50"></span>Fornecedor 03</h3>
+        <div style="margin-top:12px;font-size:13px;font-weight:600;color:#2e7d32">PONTOS FORTES</div>
+        <div class="pros-cons" style="grid-template-columns:1fr">
+          <div class="pro-item">FA de 26,9% após limpeza de dados — modelo não é nulo</div>
+          <div class="pro-item">FA sem campanha (28,1%) próxima da do Fornecedor 02 (17,8%) em alguns cenários</div>
+        </div>
+        <div style="margin-top:16px;font-size:13px;font-weight:600;color:#c62828">PONTOS FRACOS</div>
+        <div class="pros-cons" style="grid-template-columns:1fr">
+          <div class="con-item">Bias global de +47,7% — prevê sistematicamente acima do real</div>
+          <div class="con-item">Em campanhas, bias dispara para +57,9%</div>
+          <div class="con-item">Pior desempenho na Classe A (23,7%)</div>
+          <div class="con-item">Previsões originais continham valores absurdos (max 220.307 unidades)</div>
+          <div class="con-item">Mesmo após remoção de outliers, permanece o pior classificado</div>
+          <div class="con-item">70,1% das previsões são over-forecast — risco alto de excesso de estoque</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     VEREDICTO
+════════════════════════════════════════════════ -->
+<section style="background:var(--bg)">
+  <div class="container">
+    <div class="verdict-section">
+      <h2>Veredicto Final</h2>
+      <p>
+        Com base em todas as métricas e dimensões de negócio avaliadas
+        (após remoção de outliers por IQR por SKU — 139.730 registros válidos),
+        o fornecedor recomendado para o sistema de previsão de demanda é:
+      </p>
+      <span class="big-num">Fornecedor 01</span>
+      <p>
+        Com FA global de 49,2% — a maior entre os três — e o único capaz de prever picos
+        promocionais com acurácia (57,9% com campanha, bias de -0,06%). Lidera em todos os
+        segmentos: Classe A, Top-20 SKUs, todas as categorias e estados.
+        Embora a FA de ~49% ainda esteja abaixo do padrão ideal de mercado (70–80%),
+        a vantagem sobre os concorrentes é expressiva e consistente.
+      </p>
+      <p style="font-size:13px;color:rgba(255,255,255,0.65);margin-top:16px">
+        Recomendação adicional: negociar com o Fornecedor 01 um plano de melhoria contínua
+        da acurácia como cláusula contratual, com metas de FA por trimestre e penalidades por bias acima de 10%.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     FOOTER
+════════════════════════════════════════════════ -->
+<footer>
+  <p>Análise de Seleção de Fornecedor — Previsão de Demanda &nbsp;·&nbsp; Dados: CASE_01.csv &amp; CASE_01_DATA.csv</p>
+  <p style="margin-top:4px">Métricas: WAPE · FA · Bias · MAE · RMSE · MAPE &nbsp;·&nbsp; 139.730 registros válidos (outliers removidos por IQR/SKU)</p>
+</footer>
+
+</body>
+</html>
