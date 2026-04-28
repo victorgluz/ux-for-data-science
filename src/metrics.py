@@ -122,17 +122,93 @@ def compute_scorecard(df: pd.DataFrame, temporal_df: pd.DataFrame | None = None)
 
         std_fa = temporal_df[temporal_df["Fornecedor"] == lbl]["FA"].std()
 
+        b = bias(real, prev)
         rows.append(
             {
                 "Fornecedor": lbl,
                 "FA Global": forecast_accuracy(real, prev),
                 "FA Classe A": forecast_accuracy(real_a, prev_a),
                 "FA Campanha": forecast_accuracy(camp_real, camp_prev),
-                "Bias Global Abs": abs(bias(real, prev)),
+                "Bias": b,
+                "Bias Global Abs": abs(b),
                 "FA Top-20 SKUs": forecast_accuracy(
                     df_top20["VOLUME_REAL"], df_top20[col]
                 ),
                 "Consistência (Std FA)": std_fa,
+            }
+        )
+    return pd.DataFrame(rows).set_index("Fornecedor")
+
+
+def compute_wape_per_sku(df: pd.DataFrame) -> pd.DataFrame:
+    rows = []
+    for mat, sub in df.groupby("MATERIAL"):
+        real = sub["VOLUME_REAL"]
+        if real.sum() == 0:
+            continue
+        row = {"MATERIAL": mat, "volume_real": real.sum()}
+        for forn in FORNECEDORES:
+            row[LABELS[forn]] = wape(real, sub[f"VOLUME_{forn}"])
+        rows.append(row)
+    return pd.DataFrame(rows)
+
+
+def compute_fa_por_decil(df: pd.DataFrame) -> pd.DataFrame:
+    vol_por_mat = df.groupby("MATERIAL")["VOLUME_REAL"].sum()
+    decis = pd.qcut(vol_por_mat, 10, labels=[f"D{i+1}" for i in range(10)])
+    df_dec = df.merge(decis.rename("DECIL"), on="MATERIAL")
+    rows = []
+    for d, sub in df_dec.groupby("DECIL", observed=True):
+        for forn in FORNECEDORES:
+            rows.append(
+                {
+                    "Decil": d,
+                    "Fornecedor": LABELS[forn],
+                    "FA": forecast_accuracy(sub["VOLUME_REAL"], sub[f"VOLUME_{forn}"]),
+                    "volume_real": sub["VOLUME_REAL"].sum(),
+                }
+            )
+    return pd.DataFrame(rows)
+
+
+def compute_uplift_accuracy(df: pd.DataFrame) -> pd.DataFrame:
+    rows = []
+    for (loja, mat), sub in df.groupby(["LOJA", "MATERIAL"]):
+        com = sub[sub["CAMPANHA_FLAG"] == 1]
+        sem = sub[sub["CAMPANHA_FLAG"] == 0]
+        if len(com) == 0 or len(sem) == 0:
+            continue
+        base_real = sem["VOLUME_REAL"].mean()
+        if base_real <= 0:
+            continue
+        row = {"LOJA": loja, "MATERIAL": mat, "uplift_real": com["VOLUME_REAL"].mean() / base_real}
+        valid = True
+        for forn in FORNECEDORES:
+            base = sem[f"VOLUME_{forn}"].mean()
+            if base <= 0:
+                valid = False
+                break
+            row[LABELS[forn]] = com[f"VOLUME_{forn}"].mean() / base
+        if valid:
+            rows.append(row)
+    return pd.DataFrame(rows)
+
+
+def compute_coverage_zeros(df: pd.DataFrame) -> pd.DataFrame:
+    rows = []
+    total = len(df)
+    for forn in FORNECEDORES:
+        col = f"VOLUME_{forn}"
+        n_zero = int((df[col] == 0).sum())
+        n_zero_real_pos = int(((df[col] == 0) & (df["VOLUME_REAL"] > 0)).sum())
+        n_zero_real_zero = int(((df[col] == 0) & (df["VOLUME_REAL"] == 0)).sum())
+        rows.append(
+            {
+                "Fornecedor": LABELS[forn],
+                "Previsões zero": n_zero,
+                "% sobre total": n_zero / total * 100,
+                "Zero c/ real>0 (ruptura prevista)": n_zero_real_pos,
+                "Zero c/ real=0 (acertou ausência)": n_zero_real_zero,
             }
         )
     return pd.DataFrame(rows).set_index("Fornecedor")
