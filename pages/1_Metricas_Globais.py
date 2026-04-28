@@ -66,11 +66,13 @@ st.markdown(
     """
 | Métrica | Fórmula | Interpretação |
 |---|---|---|
-| **WAPE** | Σ|Real−Prev| / ΣReal | Erro absoluto ponderado pelo volume total |
+| **WAPE** | Σ|Real−Prev| / ΣReal | Erro relativo global, normalizado pelo volume total. Não divide linha a linha, então não explode em SKUs de baixo volume como o MAPE faz. |
 | **FA** | max(0, 1 − WAPE) | Forecast Accuracy; FA=100% é previsão perfeita |
-| **Bias** | Σ(Prev−Real) / ΣReal | Tendência de sobre/sub-previsão; 0 é ideal |
-| **MAE** | Média de |Real−Prev| | Erro médio absoluto em unidades de volume |
-| **RMSE** | √(Média de (Real−Prev)²) | Penaliza erros grandes; sensível a outliers |
-| **MAPE** | Média de |Real−Prev|/Real | % de erro médio absoluto; indefinido quando Real=0 |
+| **Bias** | Σ(Prev−Real) / ΣReal | Direção do erro: positivo é over-forecast, negativo é under-forecast |
+| **MAE** | Média de |Real−Prev| | Erro médio absoluto em unidades; auxiliar de sanity check |
+| **RMSE** | √(Média de (Real−Prev)²) | Penaliza erros grandes; útil para expor outliers de modelagem |
+| **MAPE** | Média de |Real−Prev|/Real | Erro percentual médio por linha; distorcido em cauda longa, mantido como diagnóstico |
+
+> WAPE é a métrica principal porque normaliza pelo total real em vez de dividir linha a linha. O efeito de "dar mais peso a SKUs de alto volume" emerge porque erros absolutos costumam escalar com o volume vendido, não porque a fórmula pondere explicitamente.
 """
 )
