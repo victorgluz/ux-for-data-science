@@ -43,8 +43,6 @@ streamlit run app.py
 
 Acesse `http://localhost:8501`.
 
-## Deploy na VPS com Docker
-
 ### Build e execução manual
 
 ```bash
