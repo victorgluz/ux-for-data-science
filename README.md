@@ -62,14 +62,6 @@ Para atualizar os CSVs, basta substituir os arquivos em `data/` e reiniciar:
 docker compose restart
 ```
 
-### Deploy via EasyPanel
-
-1. Envie o repositório para a VPS (via `git clone` ou `rsync`).
-2. No **EasyPanel**, crie um novo serviço do tipo **Docker Compose** apontando para o `docker-compose.yml` na raiz do repositório.
-3. Configure a porta **8501** como porta do serviço no painel.
-4. O EasyPanel cuida do HTTPS e do reverse proxy automaticamente.
-5. (Opcional) Para proteger com senha, adicione `streamlit-authenticator` ao `requirements.txt`.
-
 ## Filtros da Sidebar
 
 | Filtro | Descrição |
