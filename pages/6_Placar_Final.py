@@ -73,10 +73,15 @@ st.markdown("### Scorecard Detalhado")
 sc_display = scorecard.copy()
 for col in ["FA Global", "FA Classe A", "FA Campanha", "FA Top-20 SKUs"]:
     sc_display[col] = scorecard[col].map("{:.2%}".format)
+sc_display["Bias"] = scorecard["Bias"].map("{:+.2%}".format)
 sc_display["Bias Global Abs"] = scorecard["Bias Global Abs"].map("{:.2%}".format)
 sc_display["Consistência (Std FA)"] = scorecard["Consistência (Std FA)"].map("{:.4f}".format)
 
 st.dataframe(sc_display, use_container_width=True)
+st.caption(
+    "Bias signed (com sinal) é informativo: positivo indica superestimação (risco de estoque parado), "
+    "negativo indica subestimação (risco de ruptura). O ranking usa Bias Abs porque não modelamos custo assimétrico."
+)
 
 st.divider()
 st.markdown("### Relatório Textual de Recomendação")

@@ -65,6 +65,23 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
+with st.expander("Premissas adotadas (clique para expandir)"):
+    st.markdown(
+        """
+**Interpretação de `TEMPO`:** YYYYMM com extensão para 2018. Os valores `2017-13` a `2017-18` foram traduzidos para `2018-01` a `2018-06`, totalizando 17 meses (fev/2017 a jun/2018). O enunciado fala em "1 ano de previsão", mas a base contém 17 meses; optamos por manter todos eles, pois existe `VOLUME_REAL` para todos os períodos e descartar dados reduziria o poder estatístico da avaliação.
+
+**Outliers:** mantidos. As previsões extremas do Fornecedor 03 (até 220 mil unidades, contra máximo real de 28 mil) fazem parte da qualidade real entregue pelo modelo e a análise as expõe em vez de mascará-las.
+
+**Esparsidade:** combinações loja×material que não aparecem em todos os meses (lançamentos, descontinuação, ruptura) são tratadas como parte natural do problema e não são imputadas.
+
+**Saneamento mínimo:** previsões negativas seriam clipadas em zero por sanidade física, e linhas com `VOLUME_REAL` negativo descartadas. Não há registros desse tipo nos dados atuais.
+
+**Comparação justa:** todas as métricas são calculadas sobre o mesmo conjunto de linhas (mesmas chaves loja-material-período), garantindo comparação direta entre fornecedores.
+
+A análise completa, com todas as decisões metodológicas e seções de limitações, está em `notebooks/Analise_Fornecedores.ipynb`.
+"""
+    )
+
 met = compute_global_metrics(df)
 temp_df = compute_temporal_metrics(df)
 scorecard = compute_scorecard(df, temp_df)

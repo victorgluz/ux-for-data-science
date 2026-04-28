@@ -248,7 +248,7 @@ def bar_ranking(ranking: pd.DataFrame) -> go.Figure:
 
 
 def radar_scorecard(scorecard: pd.DataFrame) -> go.Figure:
-    categories = [c for c in scorecard.columns if c not in ("Bias Global Abs", "Consistência (Std FA)")]
+    categories = [c for c in scorecard.columns if c not in ("Bias", "Bias Global Abs", "Consistência (Std FA)")]
     categories_display = categories + [categories[0]]
 
     fig = go.Figure()
