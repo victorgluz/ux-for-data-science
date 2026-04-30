@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 520" role="img" aria-labelledby="title desc">
+  <title id="title">Acuracia em campanha</title>
+  <desc id="desc">Comparacao de FA com e sem campanha promocional.</desc>
+  <rect width="920" height="520" fill="#ffffff"/>
+  <text x="52" y="48" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="25" font-weight="700" fill="#172033">Campanha promocional</text>
+  <text x="52" y="78" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14" fill="#667085">Meses com campanha tem volume medio 2,4x maior; e o teste mais sensivel ao uplift</text>
+  <line x1="90" y1="410" x2="830" y2="410" stroke="#98a2b3"/>
+  <text x="230" y="448" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14" font-weight="700" text-anchor="middle" fill="#172033">Com campanha</text>
+  <text x="640" y="448" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14" font-weight="700" text-anchor="middle" fill="#172033">Sem campanha</text>
+  <g>
+    <rect x="146" y="182" width="58" height="228" rx="5" fill="#2f80ed"/>
+    <rect x="222" y="234" width="58" height="176" rx="5" fill="#f59e0b"/>
+    <rect x="298" y="410" width="58" height="0" rx="5" fill="#12b76a"/>
+    <rect x="556" y="278" width="58" height="132" rx="5" fill="#2f80ed"/>
+    <rect x="632" y="366" width="58" height="44" rx="5" fill="#f59e0b"/>
+    <rect x="708" y="322" width="58" height="88" rx="5" fill="#12b76a"/>
+  </g>
+  <g font-family="Inter, Segoe UI, Arial, sans-serif" font-size="16" font-weight="800" fill="#172033">
+    <text x="175" y="168" text-anchor="middle">57%</text>
+    <text x="251" y="220" text-anchor="middle">44%</text>
+    <text x="327" y="396" text-anchor="middle">0%</text>
+    <text x="585" y="264" text-anchor="middle">33%</text>
+    <text x="661" y="352" text-anchor="middle">11%</text>
+    <text x="737" y="308" text-anchor="middle">22%</text>
+  </g>
+  <g font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13" fill="#475467">
+    <rect x="588" y="104" width="16" height="16" fill="#2f80ed" rx="3"/><text x="612" y="117">Forn. 01</text>
+    <rect x="680" y="104" width="16" height="16" fill="#f59e0b" rx="3"/><text x="704" y="117">Forn. 02</text>
+    <rect x="772" y="104" width="16" height="16" fill="#12b76a" rx="3"/><text x="796" y="117">Forn. 03</text>
+  </g>
+</svg>

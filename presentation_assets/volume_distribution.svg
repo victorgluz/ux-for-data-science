@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 520" role="img" aria-labelledby="title desc">
+  <title id="title">Distribuicao do volume real</title>
+  <desc id="desc">Histograma estilizado mostrando concentracao em volumes baixos e cauda longa ate 27912 unidades.</desc>
+  <rect width="920" height="520" fill="#ffffff"/>
+  <text x="52" y="48" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="25" font-weight="700" fill="#172033">Distribuicao do VOLUME_REAL</text>
+  <text x="52" y="78" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14" fill="#667085">Demanda com cauda longa: poucos eventos extremos dominam a escala</text>
+  <line x1="80" y1="420" x2="820" y2="420" stroke="#98a2b3" stroke-width="1"/>
+  <line x1="80" y1="120" x2="80" y2="420" stroke="#98a2b3" stroke-width="1"/>
+  <g fill="#2f80ed">
+    <rect x="95" y="140" width="42" height="280" rx="4"/>
+    <rect x="145" y="190" width="42" height="230" rx="4"/>
+    <rect x="195" y="248" width="42" height="172" rx="4"/>
+    <rect x="245" y="305" width="42" height="115" rx="4"/>
+    <rect x="295" y="345" width="42" height="75" rx="4"/>
+    <rect x="345" y="374" width="42" height="46" rx="4"/>
+    <rect x="395" y="392" width="42" height="28" rx="4"/>
+    <rect x="445" y="404" width="42" height="16" rx="4"/>
+    <rect x="495" y="411" width="42" height="9" rx="4"/>
+    <rect x="545" y="415" width="42" height="5" rx="3"/>
+  </g>
+  <path d="M604 418 C668 415, 724 408, 790 372" fill="none" stroke="#f59e0b" stroke-width="4" stroke-linecap="round"/>
+  <circle cx="790" cy="372" r="6" fill="#f59e0b"/>
+  <text x="640" y="356" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13" font-weight="700" fill="#92400e">max. 27.912</text>
+  <text x="95" y="454" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12" fill="#667085">0-25</text>
+  <text x="195" y="454" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12" fill="#667085">50</text>
+  <text x="295" y="454" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12" fill="#667085">100</text>
+  <text x="430" y="454" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12" fill="#667085">baixo volume</text>
+  <text x="700" y="454" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="12" fill="#667085">cauda longa</text>
+  <g font-family="Inter, Segoe UI, Arial, sans-serif">
+    <rect x="608" y="124" width="248" height="124" rx="8" fill="#f8fafc" stroke="#d0d5dd"/>
+    <text x="628" y="154" font-size="13" fill="#667085">Mediana</text>
+    <text x="778" y="154" font-size="18" font-weight="800" text-anchor="end" fill="#172033">32</text>
+    <text x="628" y="186" font-size="13" fill="#667085">Media</text>
+    <text x="778" y="186" font-size="18" font-weight="800" text-anchor="end" fill="#172033">88,59</text>
+    <text x="628" y="218" font-size="13" fill="#667085">Volume zero</text>
+    <text x="778" y="218" font-size="18" font-weight="800" text-anchor="end" fill="#172033">2,14%</text>
+  </g>
+</svg>
