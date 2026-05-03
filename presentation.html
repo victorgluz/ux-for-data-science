@@ -412,7 +412,7 @@
         <div>
           <p class="eyebrow">UX for Data Science</p>
           <h1>Seleção de fornecedor para previsão de demanda</h1>
-          <p class="lead">Uma PoC comparou três fornecedores a partir da qualidade das previsões. A decisão precisa equilibrar acurácia, risco operacional e interpretação correta do erro.</p>
+          <p class="lead">A PoC comparou três fornecedores. A pergunta principal é simples: qual previsão ajuda mais o planejamento de demanda a decidir melhor?</p>
         </div>
         <div class="panel">
           <h3>Veredicto</h3>
@@ -434,14 +434,14 @@
         <div>
           <p class="eyebrow">Parte 1 - Problem Statement</p>
           <h2>Qual sistema de forecast deve avançar depois da PoC?</h2>
-          <p class="lead">Três fornecedores receberam uma base histórica e devolveram previsões de demanda. A escolha não deve premiar apenas quem acerta em média, mas quem reduz risco nos produtos e cenários que mais importam para planejamento.</p>
+          <p class="lead">Os fornecedores receberam a mesma base histórica e devolveram previsões. A escolha precisa olhar quem erra menos e, principalmente, quem erra menos onde o negócio sente mais.</p>
         </div>
         <div class="panel">
           <h3>Critério de decisão</h3>
           <ul class="bullets">
-            <li>Comparar todos os fornecedores no mesmo conjunto de linhas loja, material e período.</li>
-            <li>Privilegiar volume crítico: Classe A, Top-20 SKUs e meses com campanha.</li>
-            <li>Separar acurácia de risco: Bias e RMSE mostram direção e severidade do erro.</li>
+            <li>Usar as mesmas linhas para todos: loja, material e mês.</li>
+            <li>Dar mais atenção a produtos importantes e campanhas.</li>
+            <li>Olhar acurácia e risco: errar para cima gera estoque; errar para baixo gera ruptura.</li>
           </ul>
         </div>
       </div>
@@ -453,10 +453,10 @@
           <p class="eyebrow">Parte 1 - Assumptions and Interpretations</p>
           <h2>Premissas que tornam a comparação justa</h2>
           <ul class="bullets">
-            <li>A coluna <strong>TEMPO</strong> foi tratada como período mensal, cobrindo 17 meses avaliáveis.</li>
-            <li>Outliers de previsão foram mantidos, pois fazem parte da qualidade entregue pelo fornecedor.</li>
-            <li>Esparsidade loja-material foi tratada como comportamento natural de varejo, sem imputação.</li>
-            <li>Previsões negativas seriam clipadas em zero por sanidade física; a base atual não exige ajuste relevante.</li>
+            <li><strong>TEMPO</strong> foi lido como mês. A avaliação tem 17 meses.</li>
+            <li>Outliers de previsão foram mantidos. Eles mostram a qualidade real entregue.</li>
+            <li>Nem toda loja vende todo material todo mês. Isso foi tratado como normal no varejo.</li>
+            <li>A comparação usa a mesma base para os três fornecedores.</li>
           </ul>
         </div>
         <div class="panel">
@@ -467,7 +467,7 @@
             <div class="stat"><b>17</b><span>meses</span></div>
             <div class="stat"><b>3</b><span>fornecedores</span></div>
           </div>
-          <p class="caption">A decisão usa a metodologia atual do notebook: manter extremos, expor falhas de modelagem e comparar fornecedores de forma direta.</p>
+          <p class="caption">A decisão segue o notebook atual: manter extremos, expor falhas de modelagem e comparar os fornecedores de forma direta.</p>
         </div>
       </div>
     </section>
@@ -475,9 +475,27 @@
     <section class="slide">
       <div class="slide-inner chart-grid">
         <div>
-          <p class="eyebrow">Parte 2 - EDA</p>
+          <p class="eyebrow">Parte 2 - EDA: granularidade e cobertura</p>
+          <h2>A base é ampla, mas esparsa</h2>
+          <p class="lead">Temos muitas lojas, materiais e meses. Mesmo assim, nem toda combinação loja-material aparece em todos os períodos. Isso é esperado em varejo: há lançamentos, rupturas, sazonalidade e itens que não vendem sempre.</p>
+          <ul class="bullets">
+            <li>A base cobre 47,2% da matriz teórica loja × material × mês.</li>
+            <li>Apenas 4,9% das combinações loja-material aparecem nos 17 meses.</li>
+            <li>A mediana é 14 meses observados por combinação.</li>
+          </ul>
+        </div>
+        <div>
+          <img class="chart" src="presentation_assets/coverage_granularity.svg" alt="Granularidade e cobertura da base" />
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="slide-inner chart-grid">
+        <div>
+          <p class="eyebrow">Parte 2 - EDA: distribuição do volume real</p>
           <h2>O volume real tem cauda longa</h2>
-          <p class="lead">A maior parte das observações está em volumes baixos, mas poucos eventos extremos chegam a dezenas de milhares de unidades. Esse formato muda a leitura de erro: uma métrica linha a linha pode supervalorizar a cauda de baixo volume, enquanto erros absolutos grandes podem dominar o impacto operacional.</p>
+          <p class="lead">A maioria das vendas tem volume baixo, mas existem poucos casos muito grandes. Por isso, a média fica bem maior que a mediana.</p>
           <div class="stat-row" style="grid-template-columns:repeat(3,1fr)">
             <div class="stat"><b>32</b><span>mediana</span></div>
             <div class="stat"><b>88,59</b><span>média</span></div>
@@ -486,7 +504,25 @@
         </div>
         <div>
           <img class="chart" src="presentation_assets/volume_distribution.svg" alt="Distribuição do volume real com cauda longa" />
-          <p class="caption">A assimetria justifica priorizar WAPE e FA para a recomendação, com RMSE como diagnóstico de erros extremos.</p>
+          <p class="caption">Essa assimetria explica por que WAPE e FA são melhores para a decisão. RMSE fica como alerta para erros extremos.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="slide-inner chart-grid">
+        <div>
+          <p class="eyebrow">Parte 2 - EDA: real x previsões</p>
+          <h2>A comparação direta já aponta diferenças</h2>
+          <p class="lead">Antes mesmo das métricas finais, a distribuição das previsões mostra o comportamento de cada fornecedor.</p>
+          <ul class="bullets">
+            <li>Fornecedor 01 fica mais próximo do volume real na média e nos quartis.</li>
+            <li>Fornecedor 02 tem média parecida, mas subestima volumes baixos.</li>
+            <li>Fornecedor 03 prevê muito acima do real e gera extremos muito grandes.</li>
+          </ul>
+        </div>
+        <div>
+          <img class="chart" src="presentation_assets/real_vs_forecast_distribution.svg" alt="Comparação estatística entre volume real e previsões" />
         </div>
       </div>
     </section>
@@ -496,12 +532,12 @@
         <p class="eyebrow">Parte 3 - Evaluation Metrics</p>
         <h2>Nenhuma métrica sozinha conta a história toda</h2>
         <div class="formula-grid">
-          <div class="formula"><h3>WAPE</h3><code>Σ|real - previsto| / Σreal</code><p>Métrica principal de erro relativo global, estável para demanda com cauda longa.</p></div>
-          <div class="formula"><h3>FA</h3><code>max(0, 1 - WAPE)</code><p>Tradução executiva da acurácia. Quanto mais perto de 100%, melhor.</p></div>
-          <div class="formula"><h3>Bias</h3><code>Σ(previsto - real) / Σreal</code><p>Mostra direção do erro: over-forecast gera estoque; under-forecast gera ruptura.</p></div>
-          <div class="formula"><h3>MAE</h3><code>média |real - previsto|</code><p>Erro absoluto típico em unidades, útil para sanity check.</p></div>
-          <div class="formula"><h3>RMSE</h3><code>sqrt(média erro²)</code><p>Penaliza erros grandes e evidencia falhas extremas de modelagem.</p></div>
-          <div class="formula"><h3>Scorecard</h3><code>FA global + Classe A + campanha + Top-20 + consistência</code><p>Agrega dimensões de negócio em uma recomendação única.</p></div>
+          <div class="formula"><h3>WAPE</h3><code>Σ|real - previsto| / Σreal</code><p>Mostra o erro total em relação ao volume real total.</p></div>
+          <div class="formula"><h3>FA</h3><code>max(0, 1 - WAPE)</code><p>É a acurácia da previsão. Quanto maior, melhor.</p></div>
+          <div class="formula"><h3>Bias</h3><code>Σ(previsto - real) / Σreal</code><p>Mostra se o fornecedor costuma prever acima ou abaixo do real.</p></div>
+          <div class="formula"><h3>MAE</h3><code>média |real - previsto|</code><p>Mostra o erro médio em unidades.</p></div>
+          <div class="formula"><h3>RMSE</h3><code>sqrt(média erro²)</code><p>Penaliza erros muito grandes. Ajuda a achar falhas graves.</p></div>
+          <div class="formula"><h3>Scorecard</h3><code>FA global + Classe A + campanha + Top-20 + consistência</code><p>Junta os critérios mais importantes para a decisão.</p></div>
         </div>
       </div>
     </section>
@@ -511,7 +547,7 @@
         <div>
           <p class="eyebrow">Parte 4 - Show Metrics Results</p>
           <h2>Fornecedor 01 lidera no agregado</h2>
-          <p class="lead">O Fornecedor 01 entrega a maior FA global e o menor WAPE. O Fornecedor 03 tem FA zerada no agregado porque o erro total alcança ou supera o volume real total, com Bias severo de +70%.</p>
+          <p class="lead">No resultado global, o Fornecedor 01 é o mais equilibrado. Ele erra menos no total e tem Bias bem menor que o Fornecedor 03.</p>
           <ul class="bullets">
             <li>Forn. 01: FA 45%, WAPE 55%, Bias +6%.</li>
             <li>Forn. 02: FA 28%, WAPE 72%, Bias +8%.</li>
@@ -529,8 +565,8 @@
         <div>
           <p class="eyebrow">Parte 4 - Onde mais importa</p>
           <h2>Itens críticos e campanhas confirmam a escolha</h2>
-          <p class="lead">A decisão precisa ser mais exigente nos cenários que mais afetam abastecimento: Classe A e meses de campanha. O Fornecedor 01 mantém vantagem justamente nesses recortes.</p>
-          <div class="callout">Em campanha, o volume médio real sobe de 62,21 para 146,58 unidades. Prever esse uplift é mais valioso do que acertar apenas períodos estáveis.</div>
+          <p class="lead">O fornecedor escolhido precisa funcionar bem nos cenários mais importantes: produtos Classe A e meses de campanha.</p>
+          <div class="callout">Em campanha, o volume médio real sobe de 62,21 para 146,58 unidades. Prever esse aumento é essencial para evitar falta ou excesso de estoque.</div>
         </div>
         <div>
           <img class="chart" src="presentation_assets/abc_accuracy.svg" alt="FA por Classe ABC" />
@@ -549,10 +585,10 @@
           <h2>Campanhas separam os modelos</h2>
           <ul class="bullets">
             <li>Fornecedor 01 tem melhor FA em campanha: 57%.</li>
-            <li>Fornecedor 02 melhora em campanha, mas cai muito fora dela: 11% sem campanha.</li>
-            <li>Fornecedor 03 mostra falha crítica em campanha, com FA 0% e previsões extremas.</li>
+            <li>Fornecedor 02 vai melhor em campanha, mas cai muito fora dela: 11% sem campanha.</li>
+            <li>Fornecedor 03 falha em campanha e cria previsões extremas.</li>
           </ul>
-          <div class="callout">O maior erro do Fornecedor 03 chega a previsão de 220.306,61 unidades para uma demanda real muito menor, elevando RMSE e risco de estoque.</div>
+          <div class="callout">O Fornecedor 03 chega a prever 220.306,61 unidades. Esse tipo de erro aumenta muito o risco de estoque.</div>
         </div>
       </div>
     </section>
@@ -598,11 +634,11 @@
         <div>
           <p class="eyebrow">Parte 4 - Conclusion</p>
           <h2>Escolha recomendada: Fornecedor 01</h2>
-          <p class="lead">O Fornecedor 01 não é perfeito, mas é o candidato com melhor equilíbrio entre acurácia, itens críticos, campanhas e risco operacional. A recomendação é avançar com ele, condicionando contrato e implantação a metas trimestrais de melhoria.</p>
+          <p class="lead">O Fornecedor 01 não é perfeito, mas é o melhor equilíbrio entre acurácia, produtos importantes, campanhas e risco operacional.</p>
           <ul class="bullets">
             <li>Monitorar FA global, FA Classe A e Bias como KPIs de governança.</li>
             <li>Definir limite de Bias aceitável para evitar estoque ou ruptura.</li>
-            <li>Exigir análise de causas para SKUs de maior erro e campanhas.</li>
+            <li>Usar metas trimestrais de melhoria na implantação.</li>
           </ul>
         </div>
         <div>
@@ -614,7 +650,7 @@
     <div class="footer-mark">PoC Forecast · UX for Data Science</div>
     <nav class="nav" aria-label="Navegação da apresentação">
       <button id="prevBtn" type="button" aria-label="Slide anterior">‹</button>
-      <span class="counter" id="counter">1 / 10</span>
+      <span class="counter" id="counter">1 / 12</span>
       <button id="nextBtn" type="button" aria-label="Próximo slide">›</button>
     </nav>
   </main>
